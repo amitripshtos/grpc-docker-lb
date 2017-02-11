@@ -1,0 +1,55 @@
+version: "2"
+
+
+services:
+  grpc-server:
+    command: python server.py
+    build: .
+    networks:
+     - grpc
+    expose:
+     - 50051
+    environment:
+     - SERVICE_NAME=grpc-server
+    volumes:
+     - ./certs:/certs
+
+  grpc-client:
+    command: python client.py
+    build: .
+    networks:
+     - grpc
+    volumes:
+     - ./certs:/certs
+
+  lb:
+    build: ./lb/
+    networks:
+     - grpc
+    ports:
+     - 50051:50051
+    depends_on:
+     - grpc-server
+    volumes:
+     - ./certs:/certs
+
+  consul:
+    command: agent -ui -bootstrap -server -client 0.0.0.0 -bind=127.0.0.1
+    image: consul:latest
+    ports:
+      - "8500:8500"
+    networks:
+     - grpc
+
+  registrator:
+    command: -internal -resync 60 -retry-attempts -1 -retry-interval 1000 consul://consul:8500
+    depends_on:
+     - consul
+    image: gliderlabs/registrator:v7
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock"
+    networks:
+     - grpc
+
+networks:
+  grpc:

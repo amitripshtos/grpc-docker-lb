@@ -1,0 +1,9 @@
+frontend=*,50051;;tls
+{{ range $service := services }}{{ if eq .Name "grpc-server" }}{{range service $service.Name}}
+backend={{.Address}},{{.Port}};/;proto=h2;tls
+{{end}}{{end}}{{end}}
+private-key-file=/certs/ca.key
+certificate-file=/certs/ca.crt
+cacert=/certs/roots.pem
+workers=10
+log-level=NOTICE
