@@ -1,3 +1,5 @@
+# Update - Looks like traefik / nginx are able to load balance GRPC calls - therefore this project is not needed anymore! :)
+
 # grpc-docker-lb
 
 GRPC Automatic server-side load balancing using docker, consul ,registrator and nghttp2.
